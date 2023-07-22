@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  ui:
+    image: exam-preparation-assistant-ui:latest
+    ports:
+      - "8001:80"
+    restart: unless-stopped
+
+  api:
+    image: exam-preparation-assistant-service:latest
+    ports:
+      - "8000:80"
+    environment:
+      - OPENAI_API_KEY=?
+    restart: unless-stopped

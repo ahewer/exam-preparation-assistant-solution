@@ -1,0 +1,56 @@
+from __future__ import annotations
+
+import os
+
+from fastapi import FastAPI
+import openai
+import uvicorn as uvicorn
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+
+{% for operation in operations %}
+from services import {{operation.function_name}}
+{% endfor %}
+
+{{imports|replace("from .", "from ")}}
+
+app = FastAPI(
+    {% if info %}
+    {% for key,value in info.items() %}
+    {{ key }} = "{{ value }}",
+    {% endfor %}
+    {% endif %}
+    )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+{% for operation in operations %}
+@app.{{operation.type}}('{{operation.snake_case_path}}', response_model={{operation.response}})
+def {{operation.function_name}}_api({{operation.snake_case_arguments}}) -> {{operation.response}}:
+    {%- if operation.summary %}
+    """
+    {{ operation.summary }}
+    """
+    {%- endif %}
+    try:
+        return {{operation.function_name}}(body)
+    except Exception as exception:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to execute {{operation.function_name}}. Reason: {exception}",
+        )
+{% endfor %}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)

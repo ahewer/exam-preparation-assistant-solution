@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  description: >-
+    This is the API description for the exam preparation assistant application.
+  version: 1.0.0
+  title: Exam Preparation Assistant
+tags:
+  - name: exam
+    description: Everything related to exam preparations.
+paths:
+  /exam:
+    post:
+      tags:
+        - exam
+      summary: Send a request for a new preparation to the assistant
+      description: ''
+      operationId: sendExamPreparationRequest
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExamPreparation'
+        '405':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/ExamPreparationRequest'
+components:
+  requestBodies:
+    ExamPreparationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExamPreparationRequest'
+      description: Body containing everything relevant for an exam preparation request
+      required: true
+  schemas:
+    ExamPreparationRequest:
+      title: Request for new exam preparation
+      description: Object containing information for a new exam preparation request.
+      type: object
+      required:
+        - daysForPreparation
+        - hoursPerDay
+        - examField
+        - examContext
+      properties:
+        daysForPreparation:
+          type: integer
+          format: int64
+          example: 28
+        hoursPerDay:
+          type: integer
+          format: int64
+          example: 2
+        examField:
+          type: string
+          example: Mathematik
+        examContext:
+          type: string
+          example: Binomische Formeln
+
+    ExamPreparation:
+      title: Exam preparation
+      description: Object containing information for an exam preparation.
+      type: object
+      required:
+        - learningPlan
+        - sampleExam
+        - sampleSolution
+      properties:
+        learningPlan:
+          type: string
+          description: A detailed learning plan in markdown format
+        sampleExam:
+          type: string
+          description: Example exam in markdown format
+        sampleSolution:
+          type: string
+          description: Sample solution to the example exam in markdown format
